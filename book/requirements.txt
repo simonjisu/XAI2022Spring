@@ -6,3 +6,4 @@ seaborn
 shap
 xgboost
 scikit-learn
+spacy

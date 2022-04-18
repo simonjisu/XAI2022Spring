@@ -27,8 +27,9 @@
 
 # # Lending Club
 # 
-# LendingClub is a peer-to-peer lending company headquartered in San Francisco California. It was the first peer-to-peer lender to register its offerings as securities with the Securities and Exchange Commission (SEC) and to offer loan trading on a secondary market. At its height LendingClub was the world's largest peer-to-peer lending platform. {cite}`wiki:LendingClub`
+# LendingClub is a peer-to-peer lending company headquartered in San Francisco California. It was the first peer-to-peer lender to register its offerings as securities with the Securities and Exchange Commission (SEC) and to offer loan trading on a secondary market. At its height LendingClub was the world's largest peer-to-peer lending platform. {cite:p}`wiki:LendingClub`
 # 
+# https://brunch.co.kr/@beyondplatform/4
 # 
 # ```{figure} ./figs/lendingclub.png
 # ---
@@ -58,6 +59,8 @@
 # ## Business Metric
 # 
 # TBD
+# 
+# - It might be some explanation on why some of customer fails to pay the loan for reject purpose
 
 # In[1]:
 
@@ -70,6 +73,7 @@ import hvplot.pandas
 from pathlib import Path
 
 main_path = Path().absolute().parent
+data_path = main_path / 'data' / 'p2p' / 'lending_club' / 'processed'
 
 
 # ## Exploratory Data Analysis
@@ -109,7 +113,6 @@ main_path = Path().absolute().parent
 # In[2]:
 
 
-data_path = main_path / 'data' / 'p2p' / 'lending_club' / 'processed'
 # import data
 df = pd.read_csv( data_path / 'accepted.csv')
 df.info()
@@ -136,6 +139,18 @@ df['loan_status'].value_counts().hvplot.bar(
 # In[4]:
 
 
+loan_amnt = df.hvplot.hist(
+    y='loan_amnt', by='loan_status', subplots=False, 
+    width=400, height=400, bins=50, alpha=0.4, title='Loan Amount', 
+    xlabel='Loan Amount', ylabel='Counts', legend='top',
+    yformatter='%d'
+)
+loan_amnt
+
+
+# In[5]:
+
+
 installment = df.hvplot.hist(
     y='installment', by='loan_status', subplots=False, 
     width=400, height=400, bins=50, alpha=0.4, title='Installment', 
@@ -143,18 +158,6 @@ installment = df.hvplot.hist(
     yformatter='%d'
 )
 installment
-
-
-# In[5]:
-
-
-loan_amnt = df.hvplot.hist(
-    y='loan_amnt', by='loan_status', subplots=False, 
-    width=400, height=400, bins=30, alpha=0.4, title='Loan Amount', 
-    xlabel='Loan Amount', ylabel='Counts', legend='top',
-    yformatter='%d'
-)
-loan_amnt
 
 
 # In[6]:
@@ -214,38 +217,74 @@ df.loc[:, ['loan_status', 'term', 'int_rate']].hvplot.hist(
 )
 
 
-# ### grade & sub_grade
-# 
-# - grade: LC assigned loan grade.
-# - sub_grade: LC assigned loan subgrade.
+# Interesting relation between interest rate and installment it that can be calculate by the following formula if using "Equal repayment of principal and interest"
 
 # In[10]:
 
 
-fully_paid = df.loc[df['loan_status']=='Fully Paid', 'grade'].value_counts().hvplot.bar() 
-charged_off = df.loc[df['loan_status']=='Charged Off', 'grade'].value_counts().hvplot.bar() 
-
-(fully_paid * charged_off).opts(
-    title='Grade by Loan Status', xlabel='Grades', ylabel='Count',
-    width=500, height=450, legend_cols=2, legend_position='top_right'
-)
+def cal_amount_erpi(loan_amnt, int_rate, term):
+    """
+    loan_anmt: loan amount
+    int_rate: interest rate, percentage
+    term: in month
+    """
+    int_rate_monthly = int_rate / 100 / 12
+    payment_monthly = loan_amnt * int_rate_monthly
+    total_to_pay = payment_monthly * (1 + int_rate_monthly)**term
+    return total_to_pay / ((1 + int_rate_monthly)**term - 1)
 
 
 # In[11]:
 
 
-fully_paid = df.loc[df['loan_status'] == 'Fully Paid', 'sub_grade'].value_counts().hvplot.bar() 
-charged_off = df.loc[df['loan_status'] == 'Charged Off', 'sub_grade'].value_counts().hvplot.bar() 
+df_temp = df.loc[:, ['installment', 'loan_amnt', 'int_rate', 'term']].copy()
+df_temp['term'] = df_temp['term'].str.strip('months').str.strip().astype(np.int32)
+df_temp['installment_cal'] = df_temp.apply(lambda x: cal_amount_erpi(x['loan_amnt'], x['int_rate'], x['term']), axis=1)
 
-(fully_paid * charged_off).opts(
-    title='Sub-Grade by Loan Status', xlabel='Grades', ylabel='Count',
-    width=500, height=400, legend_cols=2, legend_position='top_right', xrotation=90
+
+# not all the payment are following "Equal repayment of principal and interest"
+
+# In[12]:
+
+
+df_temp_diff = (df_temp['installment_cal'] - df_temp['installment'])
+df_diff = df_temp_diff.agg(['mean', 'std'])
+print(f'Difference of Mean: {df_diff["mean"]:.4f} Standard Deviation {df_diff["std"]:.4f}')
+df_temp_diff.loc[abs(df_temp_diff) > 1].hvplot.hist(
+    subplots=False, width=400, height=400, bins=50, alpha=0.4, 
+    title='Differences between calculated installment (Diff > 1)', xlabel='Diff', ylabel='Counts', legend='top',
+    yformatter='%d',
 )
 
 
-# usually giving the money to grade A - D, but cannot say that the people who has lower grade pay less on their loan.
+# ### grade & sub_grade
+# 
+# - grade: LC assigned loan grade.
+# - sub_grade: LC assigned loan subgrade.
 
-# In[12]:
+# In[13]:
+
+
+grade = df.groupby(['loan_status'])[['grade']].value_counts().sort_index().hvplot.bar(
+    width=400, height=400, title='Grade Distribution', xlabel='Grade', ylabel='Count', 
+    legend='top', yformatter='%d'
+)
+grade
+
+
+# In[14]:
+
+
+sub_grade = df.groupby(['loan_status'])[['sub_grade']].value_counts().sort_index().hvplot.barh(
+    width=400, height=800, title='Sub-Grade Distribution', xlabel='Sub-Grade', ylabel='Count', 
+    legend='top', xformatter='%d'
+)
+sub_grade
+
+
+# usually people don't charge off at grade A - B, usually C grade are more often charge off. but cannot say that the people who has lower grade pay less on their loan.
+
+# In[15]:
 
 
 df.loc[df['grade'].isin(['E', 'F', 'G'])].groupby(['loan_status', 'grade'])[['grade']].value_counts().rename('count')    .hvplot.table(title='Grade Count in E-G')
@@ -256,13 +295,13 @@ df.loc[df['grade'].isin(['E', 'F', 'G'])].groupby(['loan_status', 'grade'])[['gr
 # - home_ownership: The home ownership status provided by the borrower during registration or obtained from the credit report. Our values are: RENT, OWN, MORTGAGE, OTHER
 # - purpose: A category provided by the borrower for the loan request.
 
-# In[13]:
+# In[16]:
 
 
 df.groupby(['loan_status'])[['home_ownership']].value_counts().rename('count').hvplot.table()
 
 
-# In[14]:
+# In[17]:
 
 
 home_ownership = df.groupby(['loan_status'])[['home_ownership']].value_counts().rename('Count').hvplot.bar()
@@ -272,7 +311,7 @@ home_ownership.opts(
 )
 
 
-# In[15]:
+# In[18]:
 
 
 purpose = df.groupby(['loan_status'])[['purpose']].value_counts().rename('Count').hvplot.bar()
@@ -287,20 +326,20 @@ purpose.opts(
 # - annual_inc: The self-reported annual income provided by the borrower during registration.
 # - verification_status: Indicates if income was verified by LC, not verified, or if the income source was verified
 
-# In[16]:
+# In[19]:
 
 
 df.groupby(['loan_status', 'verification_status'])['annual_inc'].describe().round(2).hvplot.table(
     title='Annual Income Table Description By Loan Status & Verification', height=200, width=700)
 
 
-# In[17]:
+# In[20]:
 
 
 (df.groupby(['loan_status'])[['verification_status']].value_counts() / df.groupby(['loan_status'])['verification_status'].count())    .rename('percentage').hvplot.table(title='Income Verified Rate', height=200)
 
 
-# In[18]:
+# In[21]:
 
 
 def is_outlier(x): 
@@ -325,7 +364,7 @@ annual_inc
 # - emp_title: The job title supplied by the Borrower when applying for the loan.
 # - emp_length: Employment length in years. Possible values are between 0 and 10 where 0 means less than one year and 10 means ten or more years.
 
-# In[19]:
+# In[22]:
 
 
 check_null = lambda x: x.isnull().sum()
@@ -337,19 +376,19 @@ df_emp_top20 = df['emp_title'].value_counts().reset_index().rename(columns={'ind
 )
 
 
-# In[20]:
+# In[23]:
 
 
 df_emp_null
 
 
-# In[21]:
+# In[24]:
 
 
 df_emp_top20
 
 
-# In[22]:
+# In[25]:
 
 
 df['emp_length'].fillna('unknown', inplace=True)
@@ -357,7 +396,7 @@ df['emp_title'].fillna('unknown', inplace=True)
 df['emp_title'] = df['emp_title'].str.lower()  # Unify into lower cases
 
 
-# In[23]:
+# In[26]:
 
 
 df_emp_top20 = df['emp_title'].value_counts().reset_index().rename(columns={'index': 'emp_title', 'emp_title': 'count'})[:20].hvplot.table(
@@ -366,7 +405,7 @@ df_emp_top20 = df['emp_title'].value_counts().reset_index().rename(columns={'ind
 df_emp_top20
 
 
-# In[24]:
+# In[27]:
 
 
 df_emp_bottom20 = df['emp_title'].value_counts().reset_index().rename(columns={'index': 'emp_title', 'emp_title': 'count'})[-20:].hvplot.table(
@@ -375,9 +414,15 @@ df_emp_bottom20 = df['emp_title'].value_counts().reset_index().rename(columns={'
 df_emp_bottom20
 
 
-# titles are not normalized
+# In[28]:
 
-# In[25]:
+
+print(df['emp_title'].nunique())
+
+
+# titles are not normalized(or structured), too many unique titles in the data.
+
+# In[29]:
 
 
 from itertools import product
@@ -394,8 +439,10 @@ emp_length.opts(
 # 
 # - issue_d: The month which the loan was funded.
 # - earliest_cr_line: The month the borrower's earliest reported credit line was opened.
+# 
+# Most people try to do the loan near the 2016 and started to create their credit line at 2000
 
-# In[26]:
+# In[30]:
 
 
 df['issue_d'] = pd.to_datetime(df['issue_d'])
@@ -422,14 +469,16 @@ loan_issue_date + earliest_cr_line
 
 
 # ### title
+# 
+# title is similar to the purpose, will drop it later
 
-# In[27]:
+# In[31]:
 
 
 print(df['title'].isnull().sum())
 
 
-# In[28]:
+# In[32]:
 
 
 df['title'] = df['title'].str.lower()
@@ -442,14 +491,14 @@ df['title'].value_counts()[:10]
 # - open_acc: The number of open credit lines in the borrower's credit file.
 # - total_acc: The total number of credit lines currently in the borrower's credit file.
 
-# In[29]:
+# In[33]:
 
 
 df['dti'].describe().reset_index().hvplot.table(title='DTI Table Description', height=250)
 # Can DTI be 999?
 
 
-# In[30]:
+# In[34]:
 
 
 dti = df.hvplot.hist(
@@ -460,7 +509,7 @@ dti = df.hvplot.hist(
 dti
 
 
-# In[31]:
+# In[35]:
 
 
 dti_sub = df.loc[df['dti'] <= 50].hvplot.hist(
@@ -478,7 +527,7 @@ dti_sub2 = df.loc[df['dti'] > 50].hvplot.hist(
 dti_sub + dti_sub2
 
 
-# In[32]:
+# In[36]:
 
 
 open_acc = df.hvplot.hist(
@@ -498,21 +547,23 @@ open_acc + total_acc
 
 # ### revol_bal & revol_util
 # 
-# ```{admonition} What is Revolving balance?
+# ```{admonition} What is revolving balance?
 # 
 # In credit card terms, a revolving balance is the portion of credit card spending that goes unpaid at the end of a billing cycle. 
 # ```
 # 
+# https://www.capitalone.com/learn-grow/money-management/revolving-credit-balance/
+# 
 # - revol_bal: Total credit revolving balance.
 # - revol_util: Revolving line utilization rate, or the amount of credit the borrower is using relative to all available revolving credit.
 
-# In[33]:
+# In[37]:
 
 
-df.groupby(['loan_status'])['revol_bal'].describe().reset_index().hvplot.table(title='Revolving Balance Table Description', height=100)
+df.groupby(['loan_status'])['revol_bal'].describe().round(2).reset_index().hvplot.table(title='Revolving Balance Table Description', height=100)
 
 
-# In[34]:
+# In[38]:
 
 
 revol_bal = df.hvplot.hist(
@@ -529,7 +580,7 @@ revol_bal_sub = df.loc[df['revol_bal']<=250000].hvplot.hist(
 revol_bal + revol_bal_sub
 
 
-# In[35]:
+# In[39]:
 
 
 revol_util = df.hvplot.hist(
@@ -549,11 +600,28 @@ revol_util + revol_util_sub
 
 # ### pub_rec, pub_rec_bankruptcies & mort_acc
 # 
+# 
+# ```{admonition} What is derogatory record?
+# A derogatory public record is negative information on your credit report that is of a more serious nature and has become a matter of public record. It usually consists of bankruptcy filings, civil court judgments, foreclosures and tax liens. In some states, child support delinquencies are also a matter of public record.
+# ```
+# 
+# https://budgeting.thenest.com/derogatory-public-record-mean-25266.html
+# 
+# 
+# ```{admonition} What is a mortgage?
+# The mortgage refers to a loan used to purchase or maintain a home, land, or other types of real estate. Usually paying the mortgage consistently will increse the credit score.
+# ```
+# 
+# https://www.investopedia.com/terms/m/mortgage.asp
+# https://www.investopedia.com/articles/personal-finance/031215/how-mortgages-affect-credit-scores.asp
+# 
 # - pub_rec: Number of derogatory public records.
 # - pub_rec_bankruptcies: Number of public record bankruptcies.
 # - mort_acc: Number of mortgage accounts.
+# 
+# From the data we can process these data as binary who had never have a public record versus more than once.
 
-# In[36]:
+# In[40]:
 
 
 pub_rec = df.groupby(['loan_status'])['pub_rec'].value_counts().rename('Count').hvplot.barh(
@@ -563,7 +631,7 @@ pub_rec = df.groupby(['loan_status'])['pub_rec'].value_counts().rename('Count').
 pub_rec
 
 
-# In[37]:
+# In[41]:
 
 
 pub_rec_bankruptcies = df.groupby(['loan_status'])['pub_rec_bankruptcies'].value_counts().rename('Count').hvplot.barh(
@@ -573,7 +641,13 @@ pub_rec_bankruptcies = df.groupby(['loan_status'])['pub_rec_bankruptcies'].value
 pub_rec_bankruptcies
 
 
-# In[38]:
+# In[42]:
+
+
+df['mort_acc'].describe().round(2)
+
+
+# In[43]:
 
 
 mort_acc = df.groupby(['loan_status'])['mort_acc'].value_counts().rename('Count').hvplot.barh(
@@ -592,7 +666,7 @@ mort_acc
 # - application_type: Indicates whether the loan is an individual application or a joint application with two co-borrowers.
 # - addr_state: The state provided by the borrower in the loan application.
 
-# In[39]:
+# In[44]:
 
 
 initial_list_status = df.groupby(['loan_status'])['initial_list_status'].value_counts().rename('Count').hvplot.bar(
@@ -602,7 +676,7 @@ initial_list_status = df.groupby(['loan_status'])['initial_list_status'].value_c
 initial_list_status
 
 
-# In[40]:
+# In[45]:
 
 
 application_type = df.groupby(['loan_status'])['application_type'].value_counts().rename('Count').hvplot.bar(
@@ -612,7 +686,7 @@ application_type = df.groupby(['loan_status'])['application_type'].value_counts(
 application_type
 
 
-# In[41]:
+# In[46]:
 
 
 addr_state = df.groupby(['loan_status'])['addr_state'].value_counts().rename('Count').hvplot.barh(
@@ -628,7 +702,7 @@ addr_state
 # - Missing values
 # - Detecting outlieres
 
-# In[42]:
+# In[47]:
 
 
 # reload the data
@@ -638,10 +712,15 @@ print(df.columns)
 
 
 # We will not use following columns: 
-# - title: duplicated with purpose
-# - emp_title: too many unique jobs, but seems like some of them are duplicated
+# - `title`: duplicated with purpose
+# - `emp_title`: too many unique jobs, but seems like some of them are duplicated
+# 
+# Other columns 
+# - `emp_length`: add 'unknown' for NaN values
+# - `pub_rec`, `pub_rec_bankruptcies`: convert as binary
+# - `verification_status`: combine verified together
 
-# In[43]:
+# In[48]:
 
 
 df.drop(columns=['title', 'emp_title'], inplace=True)
@@ -649,7 +728,7 @@ df.drop(columns=['title', 'emp_title'], inplace=True)
 
 # check missing data
 
-# In[44]:
+# In[49]:
 
 
 for column in df.columns:

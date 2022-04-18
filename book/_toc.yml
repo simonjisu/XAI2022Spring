@@ -3,5 +3,13 @@
 
 format: jb-book
 root: intro
-chapters:
-- file: LendingClub
+parts:
+- caption: Explainable AI
+  numbered: True  
+  chapters:
+  - file: 00-PDP_ALE
+  - file: 01-FI
+- caption: Example
+  numbered: True 
+  chapters:
+  - file: LendingClub

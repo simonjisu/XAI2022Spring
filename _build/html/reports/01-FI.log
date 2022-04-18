@@ -1,0 +1,36 @@
+Traceback (most recent call last):
+  File "/home/simonjisu/miniconda3/lib/python3.8/site-packages/jupyter_cache/executors/utils.py", line 51, in single_nb_execution
+    executenb(
+  File "/home/simonjisu/miniconda3/lib/python3.8/site-packages/nbclient/client.py", line 1204, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+  File "/home/simonjisu/miniconda3/lib/python3.8/site-packages/nbclient/util.py", line 84, in wrapped
+    return just_run(coro(*args, **kwargs))
+  File "/home/simonjisu/miniconda3/lib/python3.8/site-packages/nbclient/util.py", line 62, in just_run
+    return loop.run_until_complete(coro)
+  File "/home/simonjisu/miniconda3/lib/python3.8/asyncio/base_events.py", line 616, in run_until_complete
+    return future.result()
+  File "/home/simonjisu/miniconda3/lib/python3.8/site-packages/nbclient/client.py", line 663, in async_execute
+    await self.async_execute_cell(
+  File "/home/simonjisu/miniconda3/lib/python3.8/site-packages/nbclient/client.py", line 965, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/home/simonjisu/miniconda3/lib/python3.8/site-packages/nbclient/client.py", line 862, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+from collections import defaultdict
+pdp_dict = defaultdict()
+
+for f in features:
+    pdp_dict[f] = partial_dependence(model, X_train, features=[f], grid_resolution=20, kind='average')
+------------------
+
+[0;31m---------------------------------------------------------------------------[0m
+[0;31mNameError[0m                                 Traceback (most recent call last)
+Input [0;32mIn [4][0m, in [0;36m<cell line: 4>[0;34m()[0m
+[1;32m      2[0m pdp_dict [38;5;241m=[39m defaultdict()
+[1;32m      4[0m [38;5;28;01mfor[39;00m f [38;5;129;01min[39;00m features:
+[0;32m----> 5[0m     pdp_dict[f] [38;5;241m=[39m partial_dependence(model, [43mX_train[49m, features[38;5;241m=[39m[f], grid_resolution[38;5;241m=[39m[38;5;241m20[39m, kind[38;5;241m=[39m[38;5;124m'[39m[38;5;124maverage[39m[38;5;124m'[39m)
+
+[0;31mNameError[0m: name 'X_train' is not defined
+NameError: name 'X_train' is not defined
+

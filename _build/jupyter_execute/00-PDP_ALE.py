@@ -5,7 +5,7 @@
 # 
 # ## Main Concept
 # 
-# The partial dependence plot(PDP) shows the marginal effect one or two features have on the predicted outcome of a machine learning model ( {cite}`friedman2001greedy` ).
+# The partial dependence plot(PDP) shows the marginal effect one or two features have on the predicted outcome of a machine learning model {cite}`friedman2001greedy`.
 # 
 # In the probability theory, the marginal probability of random variable $X$ on $Y$ can be calculated by getting expectation on the joint distribution of random variables $X, Y$.
 # 
@@ -165,6 +165,10 @@ plt.show()
 # # Accumulated Local Effects
 
 # # References
+# 
+# ```{bibliography}
+# :filter: docname in docnames
+# ```
 # 
 # ## Partial Dependence Plot
 # 

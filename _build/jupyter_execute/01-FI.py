@@ -5,9 +5,7 @@
 # 
 # ## Main Concept: Friedman’s H-statistic
 # 
-# {cite:p}`friedman2008predictive`
-# 
-# A function $F(\mathbf{x})$ is said to exhibit an interaction between two of its variables $x_j$ and $x_k$ if the difference in the value of $F(x)$ as a result of changing the value of $x_j$ depends on the value of $x_k$.
+# {cite:p}`friedman2008predictive` A function $F(\mathbf{x})$ is said to exhibit an interaction between two of its variables $x_j$ and $x_k$ if the difference in the value of $F(x)$ as a result of changing the value of $x_j$ depends on the value of $x_k$.
 # 
 # $$\Bbb{E}_{\mathbf{x}} = \Big\lbrack \dfrac{\partial^2 F(\mathbf{x})}{\partial x_j \partial x_k} \Big\rbrack^2 > 0$$
 # 
@@ -62,16 +60,19 @@
 
 
 import sys
+import hvplot.pandas
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 from pathlib import Path
+from sklearn.inspection import PartialDependenceDisplay, partial_dependence
 
 main_path = str(Path().absolute().parent)
 sys.path.append(main_path)
 
-import hvplot.pandas
-import pandas as pd
-import matplotlib.pyplot as plt
 from src.CLhousing import load_model
-from sklearn.inspection import PartialDependenceDisplay, partial_dependence
 
 
 # In[2]:
@@ -80,12 +81,14 @@ from sklearn.inspection import PartialDependenceDisplay, partial_dependence
 ds, model = load_model(seed=0)
 
 
+# we first see the partial dependence plots
+
 # In[3]:
 
 
 from itertools import combinations
 
-features = ['MedInc', 'HouseAge', 'AveRooms', 'AveBedrms', 'Population', 'AveOccup', 'Latitude', 'Longitude']
+features = ds.data.columns
 two_way_features = list(combinations(features, 2))
 fig, axes = plt.subplots(len(two_way_features) // 4, 4, figsize=(16, 16))
 
@@ -102,7 +105,60 @@ plt.tight_layout()
 plt.show()
 
 
+# In[4]:
+
+
+# https://github.com/scikit-learn/scikit-learn/issues/22383
+
+features_idx = list(range(len(features)))
+two_way_features_idx = list(combinations(features_idx, 2))
+
+h_uni = {}
+for i in features_idx:
+    h_uni[i] = partial_dependence(estimator=model, X=ds.X_train, features=[i], percentiles=(0.05, 0.95), kind='average')
+
+h_bi = {}
+for i, j in two_way_features_idx:
+    h_bi[(i, j)] = partial_dependence(estimator=model, X=ds.X_train, features=[i, j], percentiles=(0.05, 0.95), kind='average')
+
+h = np.zeros((len(features_idx), len(features_idx)))
+
+for i, j in two_way_features_idx:
+    a = (h_bi[(i, j)]['average'] - h_uni[i]['average'].reshape(1, -1, 1) - h_uni[j]['average'].reshape(1, 1, -1))**2
+    b = (h_bi[(i, j)]['average'])**2
+    h[i, j] = a.sum() / b.sum()
+
+
+# In[5]:
+
+
+fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+
+sns.heatmap(data=pd.DataFrame(h, index=features, columns=features), cmap='coolwarm', annot=True, fmt='.2g', linewidths=0.5, ax=ax)
+ax.set_title('H-statistics', fontsize=20)
+plt.show()
+
+
+# In[6]:
+
+
+fig, axes = plt.subplots(len(two_way_features_idx) // 4, 4, figsize=(16, 18))
+for k, ((i, j), ax) in enumerate(zip(two_way_features_idx, axes.flatten())):
+    interaction = h_bi[(i, j)]['average'] - h_uni[i]['average'].reshape(1, -1, 1) - h_uni[j]['average'].reshape(1, 1, -1)
+    df_interaction = pd.DataFrame(interaction.squeeze(), index=h_bi[(i, j)]['values'][0].round(2), columns=h_bi[(i, j)]['values'][1].round(2))
+    sns.heatmap(df_interaction, cmap='coolwarm', ax=ax)
+    ax.set_xlabel(two_way_features[k][0])
+    ax.set_ylabel(two_way_features[k][1])
+
+plt.tight_layout()
+plt.show()
+
+
 # # References
+# 
+# ```{bibliography}
+# :filter: docname in docnames
+# ```
 # 
 # ## Feature Interaction
 # 

@@ -11,6 +11,10 @@ shap = "*"
 scikit-learn = "*"
 hvplot = "*"
 ipykernel = "*"
+seaborn = "*"
+jupyter-book = "*"
+jupytext = "*"
+ghp-import = "*"
 
 [dev-packages]
 

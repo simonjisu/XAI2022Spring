@@ -14,8 +14,11 @@ class CLDataset:
         # preprocessing
         self.y_mean = self.house['target'].mean()
         self.df[self.house['target_names'][0]] = self.house['target'] - self.y_mean
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.df.iloc[:, :-1], self.df.iloc[:, -1], test_size=0.1, random_state=seed)
-
+        self.data = self.df.iloc[:, :-1]
+        self.target = self.df.iloc[:, -1]
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+            self.data, self.target, test_size=0.1, random_state=seed)
+        
 
 def load_model(seed:int=0):
     ds = CLDataset(seed)

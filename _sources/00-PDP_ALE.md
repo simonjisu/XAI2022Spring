@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.11.5
+    jupytext_version: 1.13.8
 kernelspec:
   display_name: Python 3.8.12 ('base')
   language: python
@@ -15,7 +15,7 @@ kernelspec:
 
 ## Main Concept
 
-The partial dependence plot(PDP) shows the marginal effect one or two features have on the predicted outcome of a machine learning model ( {cite}`friedman2001greedy` ).
+The partial dependence plot(PDP) shows the marginal effect one or two features have on the predicted outcome of a machine learning model {cite}`friedman2001greedy`.
 
 In the probability theory, the marginal probability of random variable $X$ on $Y$ can be calculated by getting expectation on the joint distribution of random variables $X, Y$.
 
@@ -170,7 +170,13 @@ plt.show()
 
 +++
 
+
+
 # References
+
+```{bibliography}
+:filter: docname in docnames
+```
 
 ## Partial Dependence Plot
 

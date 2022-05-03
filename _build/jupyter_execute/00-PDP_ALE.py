@@ -3,6 +3,8 @@
 
 # # Partial Dependence Plot
 # 
+# Part of articles are from {cite:p}`molnar2022` Chapter [8.1 Partial Dependence Plot(PDP)](https://christophm.github.io/interpretable-ml-book/pdp.html).
+# 
 # ## Main Concept
 # 
 # The partial dependence plot(PDP) shows the marginal effect one or two features have on the predicted outcome of a machine learning model {cite}`friedman2001greedy`.
@@ -57,7 +59,7 @@ from sklearn.metrics import r2_score, mean_squared_error
 # 
 # An household is a group of people residing within a home. Since the average number of rooms and bedrooms in this dataset are provided per household, these columns may take surpinsingly large values for block groups with few households and many empty houses, such as vacation resorts.
 # 
-# - References: https://scikit-learn.org/stable/datasets/real_world.html#california-housing-dataset
+# - References: [7.2.7. California Housing dataset](https://scikit-learn.org/stable/datasets/real_world.html#california-housing-dataset) from {cite:p}`sklearn_api`  
 # 
 # | Columns | Explaination |
 # | --- | --- |
@@ -169,12 +171,3 @@ plt.show()
 # ```{bibliography}
 # :filter: docname in docnames
 # ```
-# 
-# ## Partial Dependence Plot
-# 
-# - https://christophm.github.io/interpretable-ml-book/pdp.html
-# - https://scikit-learn.org/stable/modules/partial_dependence.html
-# - https://scikit-learn.org/stable/auto_examples/inspection/plot_partial_dependence.html#sphx-glr-auto-examples-inspection-plot-partial-dependence-py
-# - https://soohee410.github.io/iml_pdp
-# 
-# ## Accumulated Local Effects

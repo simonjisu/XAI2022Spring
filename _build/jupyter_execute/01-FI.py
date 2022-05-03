@@ -3,6 +3,8 @@
 
 # # Feature Interaction
 # 
+# Part of articles are from {cite:p}`molnar2022` Chapter [8.3 Feature Interaction](https://christophm.github.io/interpretable-ml-book/interaction.html).
+# 
 # ## Main Concept: Friedman’s H-statistic
 # 
 # {cite:p}`friedman2008predictive` A function $F(\mathbf{x})$ is said to exhibit an interaction between two of its variables $x_j$ and $x_k$ if the difference in the value of $F(x)$ as a result of changing the value of $x_j$ depends on the value of $x_k$.
@@ -74,16 +76,12 @@ sys.path.append(main_path)
 
 from src.CLhousing import load_model
 
-
-# In[2]:
-
-
 ds, model = load_model(seed=0)
 
 
 # we first see the partial dependence plots
 
-# In[3]:
+# In[2]:
 
 
 from itertools import combinations
@@ -105,7 +103,7 @@ plt.tight_layout()
 plt.show()
 
 
-# In[4]:
+# In[3]:
 
 
 # https://github.com/scikit-learn/scikit-learn/issues/22383
@@ -115,37 +113,58 @@ two_way_features_idx = list(combinations(features_idx, 2))
 
 h_uni = {}
 for i in features_idx:
-    h_uni[i] = partial_dependence(estimator=model, X=ds.X_train, features=[i], percentiles=(0.05, 0.95), kind='average')
+    h_uni[i] = partial_dependence(
+        estimator=model, 
+        X=ds.X_train, 
+        features=[i], 
+        percentiles=(0.05, 0.95), 
+        kind='average'
+    )
 
 h_bi = {}
 for i, j in two_way_features_idx:
-    h_bi[(i, j)] = partial_dependence(estimator=model, X=ds.X_train, features=[i, j], percentiles=(0.05, 0.95), kind='average')
+    h_bi[(i, j)] = partial_dependence(
+        estimator=model, 
+        X=ds.X_train, 
+        features=[i, j], 
+        percentiles=(0.05, 0.95), 
+        kind='average'
+    )
 
 h = np.zeros((len(features_idx), len(features_idx)))
 
 for i, j in two_way_features_idx:
-    a = (h_bi[(i, j)]['average'] - h_uni[i]['average'].reshape(1, -1, 1) - h_uni[j]['average'].reshape(1, 1, -1))**2
+    a = (h_bi[(i, j)]['average'] - h_uni[i]['average'].reshape(1, -1, 1) - \
+            h_uni[j]['average'].reshape(1, 1, -1))**2
     b = (h_bi[(i, j)]['average'])**2
     h[i, j] = a.sum() / b.sum()
+
+
+# In[4]:
+
+
+fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+
+sns.heatmap(
+    data=pd.DataFrame(h, index=features, columns=features), 
+    cmap='coolwarm', annot=True, fmt='.2g', linewidths=0.5, ax=ax
+)
+ax.set_title('H-statistics', fontsize=20)
+plt.show()
 
 
 # In[5]:
 
 
-fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-
-sns.heatmap(data=pd.DataFrame(h, index=features, columns=features), cmap='coolwarm', annot=True, fmt='.2g', linewidths=0.5, ax=ax)
-ax.set_title('H-statistics', fontsize=20)
-plt.show()
-
-
-# In[6]:
-
-
 fig, axes = plt.subplots(len(two_way_features_idx) // 4, 4, figsize=(16, 18))
 for k, ((i, j), ax) in enumerate(zip(two_way_features_idx, axes.flatten())):
-    interaction = h_bi[(i, j)]['average'] - h_uni[i]['average'].reshape(1, -1, 1) - h_uni[j]['average'].reshape(1, 1, -1)
-    df_interaction = pd.DataFrame(interaction.squeeze(), index=h_bi[(i, j)]['values'][0].round(2), columns=h_bi[(i, j)]['values'][1].round(2))
+    interaction = h_bi[(i, j)]['average'] - h_uni[i]['average'].reshape(1, -1, 1) -\
+        h_uni[j]['average'].reshape(1, 1, -1)
+    
+    df_interaction = pd.DataFrame(interaction.squeeze(), 
+        index=h_bi[(i, j)]['values'][0].round(2), 
+        columns=h_bi[(i, j)]['values'][1].round(2)
+    )
     sns.heatmap(df_interaction, cmap='coolwarm', ax=ax)
     ax.set_xlabel(two_way_features[k][0])
     ax.set_ylabel(two_way_features[k][1])
@@ -159,8 +178,3 @@ plt.show()
 # ```{bibliography}
 # :filter: docname in docnames
 # ```
-# 
-# ## Feature Interaction
-# 
-# - https://christophm.github.io/interpretable-ml-book/interaction.html
-# - [Predictive learning via rule ensembles](https://arxiv.org/abs/0811.1679)

@@ -10,7 +10,8 @@ name = "pytorch"
 
 [packages]
 numpy = "*"
-matplotlib = "3.4.3"
+torch = {version = "==1.11.0+cu113", index = "pytorch"}
+matplotlib = "==3.4.3"
 pandas = "*"
 shap = "*"
 scikit-learn = "*"
@@ -21,7 +22,6 @@ jupyter-book = "*"
 jupytext = "*"
 ghp-import = "*"
 xgboost = "*"
-torch = {version = "==1.11.0+cu113", index = "pytorch"}
 
 [dev-packages]
 

@@ -8,14 +8,18 @@ url = "https://download.pytorch.org/whl/cu113/"
 verify_ssl = true
 name = "pytorch"
 
+[[source]]
+url = "https://data.pyg.org/whl/torch-1.11.0+cu113.html"
+verify_ssl = true
+name = "pytorch-geometric"
+
 [packages]
 numpy = "*"
 torch = {version = "==1.11.0+cu113", index = "pytorch"}
-matplotlib = "==3.4.3"
+matplotlib = {version = "==3.4.3", sys_platform = "!= 'win32'"}
 pandas = "*"
 shap = "*"
 scikit-learn = "*"
-hvplot = "*"
 ipykernel = "*"
 seaborn = "*"
 jupyter-book = "*"

@@ -9,7 +9,7 @@ verify_ssl = true
 name = "pytorch"
 
 [[source]]
-url = "https://data.pyg.org/whl/torch-1.11.0+cu113.html"
+url = "https://data.pyg.org/whl/torch-1.11.0%2Bcu113/"
 verify_ssl = true
 name = "pytorch-geometric"
 
@@ -26,7 +26,11 @@ jupyter-book = "*"
 jupytext = "*"
 ghp-import = "*"
 xgboost = "*"
-
+torch_scatter = {file="https://data.pyg.org/whl/torch-1.11.0%2Bcu113/torch_scatter-2.0.9-cp310-cp310-linux_x86_64.whl", index = "pytorch-geometric"}
+torch_sparse = {file="https://data.pyg.org/whl/torch-1.11.0%2Bcu113/torch_sparse-0.6.13-cp310-cp310-linux_x86_64.whl", index = "pytorch-geometric"} 
+torch-geometric = "*"
+torch_cluster = {file="https://data.pyg.org/whl/torch-1.11.0%2Bcu113/torch_cluster-1.6.0-cp310-cp310-linux_x86_64.whl", index = "pytorch-geometric"}
+torch_spline_conv = {file="https://data.pyg.org/whl/torch-1.11.0%2Bcu113/torch_spline_conv-1.2.1-cp310-cp310-linux_x86_64.whl", index = "pytorch-geometric"}
 [dev-packages]
 
 [requires]

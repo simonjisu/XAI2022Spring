@@ -9,3 +9,4 @@ parts:
   chapters:
   - file: 00-PDP_ALE
   - file: 01-FI
+  - file: 02-SHAP

@@ -73,7 +73,7 @@ from sklearn.metrics import r2_score, mean_squared_error
 # | Latitude | block group latitude |
 # | Longitude | block group longitude |
 
-# In[2]:
+# In[ ]:
 
 
 house = fetch_california_housing()
@@ -88,7 +88,7 @@ df.hvplot.hist(y='MedHouseVal', bins=30, xlabel='Median House Value(Centralized,
 # 
 # where $\bar{y} = \frac{1}{n} \sum_{i=1}^{n} y_i$, $\sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} \epsilon_i^2$
 
-# In[3]:
+# In[ ]:
 
 
 # Select the hyperparameters
@@ -109,7 +109,7 @@ print(f'The mean squared error (MSE) on test set is {mean_squared_error(y_true=y
 print(f'The R2 Score on test set is {r2_score(y_true=y_test, y_pred=y_pred):.4f}')
 
 
-# In[4]:
+# In[ ]:
 
 
 features = ['MedInc', 'HouseAge', 'AveRooms', 'AveBedrms', 'Population', 'AveOccup','Latitude', 'Longitude']
@@ -133,7 +133,7 @@ plt.tight_layout()
 plt.show()
 
 
-# In[5]:
+# In[ ]:
 
 
 features = ['MedInc', 'HouseAge', 'AveRooms', 'AveBedrms', 'Population', 'AveOccup','Latitude', 'Longitude']

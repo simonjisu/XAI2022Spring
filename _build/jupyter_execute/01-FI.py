@@ -81,7 +81,7 @@ ds, model = load_model(seed=0)
 
 # we first see the partial dependence plots
 
-# In[2]:
+# In[ ]:
 
 
 from itertools import combinations
@@ -103,7 +103,7 @@ plt.tight_layout()
 plt.show()
 
 
-# In[3]:
+# In[ ]:
 
 
 # https://github.com/scikit-learn/scikit-learn/issues/22383
@@ -140,7 +140,7 @@ for i, j in two_way_features_idx:
     h[i, j] = a.sum() / b.sum()
 
 
-# In[4]:
+# In[ ]:
 
 
 fig, ax = plt.subplots(1, 1, figsize=(8, 6))
@@ -153,7 +153,7 @@ ax.set_title('H-statistics', fontsize=20)
 plt.show()
 
 
-# In[5]:
+# In[ ]:
 
 
 fig, axes = plt.subplots(len(two_way_features_idx) // 4, 4, figsize=(16, 18))

@@ -18,30 +18,30 @@ Traceback (most recent call last):
 nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
 ------------------
 import sys
-import hvplot.pandas
-import numpy as np
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-
 from pathlib import Path
-from sklearn.inspection import PartialDependenceDisplay, partial_dependence
 
 main_path = str(Path().absolute().parent)
 sys.path.append(main_path)
 
-from src.CLhousing import load_model
+import matplotlib.pyplot as plt
+import pandas as pd
+import hvplot.pandas
 
-ds, model = load_model(seed=0)
+from sklearn.datasets import fetch_california_housing
+from sklearn.ensemble import HistGradientBoostingRegressor
+from sklearn.inspection import PartialDependenceDisplay
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score, mean_squared_error
 ------------------
 
 [0;31m---------------------------------------------------------------------------[0m
 [0;31mModuleNotFoundError[0m                       Traceback (most recent call last)
-Input [0;32mIn [1][0m, in [0;36m<cell line: 2>[0;34m()[0m
-[1;32m      1[0m [38;5;28;01mimport[39;00m [38;5;21;01msys[39;00m
-[0;32m----> 2[0m [38;5;28;01mimport[39;00m [38;5;21;01mhvplot[39;00m[38;5;21;01m.[39;00m[38;5;21;01mpandas[39;00m
-[1;32m      3[0m [38;5;28;01mimport[39;00m [38;5;21;01mnumpy[39;00m [38;5;28;01mas[39;00m [38;5;21;01mnp[39;00m
-[1;32m      4[0m [38;5;28;01mimport[39;00m [38;5;21;01mpandas[39;00m [38;5;28;01mas[39;00m [38;5;21;01mpd[39;00m
+Input [0;32mIn [1][0m, in [0;36m<cell line: 9>[0;34m()[0m
+[1;32m      7[0m [38;5;28;01mimport[39;00m [38;5;21;01mmatplotlib[39;00m[38;5;21;01m.[39;00m[38;5;21;01mpyplot[39;00m [38;5;28;01mas[39;00m [38;5;21;01mplt[39;00m
+[1;32m      8[0m [38;5;28;01mimport[39;00m [38;5;21;01mpandas[39;00m [38;5;28;01mas[39;00m [38;5;21;01mpd[39;00m
+[0;32m----> 9[0m [38;5;28;01mimport[39;00m [38;5;21;01mhvplot[39;00m[38;5;21;01m.[39;00m[38;5;21;01mpandas[39;00m
+[1;32m     11[0m [38;5;28;01mfrom[39;00m [38;5;21;01msklearn[39;00m[38;5;21;01m.[39;00m[38;5;21;01mdatasets[39;00m [38;5;28;01mimport[39;00m fetch_california_housing
+[1;32m     12[0m [38;5;28;01mfrom[39;00m [38;5;21;01msklearn[39;00m[38;5;21;01m.[39;00m[38;5;21;01mensemble[39;00m [38;5;28;01mimport[39;00m HistGradientBoostingRegressor
 
 [0;31mModuleNotFoundError[0m: No module named 'hvplot'
 ModuleNotFoundError: No module named 'hvplot'

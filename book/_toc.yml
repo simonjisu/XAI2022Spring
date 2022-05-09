@@ -4,9 +4,17 @@
 format: jb-book
 root: intro
 parts:
-- caption: Explainable AI
-  numbered: false  
-  chapters:
-  - file: 00-PDP_ALE
-  - file: 01-FI
-  - file: 02-SHAP
+  - caption: Chapter 1
+    numbered: false  
+    chapters:
+    - file: 00-PDP_ALE
+
+  - caption: Chapter 2
+    numbered: false  
+    chapters:
+    - file: 01-FI
+
+  - caption: Chapter 3
+    numbered: false  
+    chapters:
+    - file: 02-SHAP

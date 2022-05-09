@@ -15,6 +15,7 @@ jupyter-book = "*"
 jupytext = "*"
 ghp-import = "*"
 xgboost = "*"
+hvplot = "*"
 
 [dev-packages]
 

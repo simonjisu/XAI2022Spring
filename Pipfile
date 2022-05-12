@@ -3,6 +3,11 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
+[[source]]
+url = "https://download.pytorch.org/whl/cu113/"
+verify_ssl = true
+name = "pytorch"
+
 [packages]
 numpy = "*"
 matplotlib = "*"
@@ -16,6 +21,7 @@ jupytext = "*"
 ghp-import = "*"
 xgboost = "*"
 hvplot = "*"
+torch = {version = "==1.11.0+cu113", index = "pytorch"}
 
 [dev-packages]
 

@@ -22,6 +22,8 @@ ghp-import = "*"
 xgboost = "*"
 hvplot = "*"
 torch = {version = "==1.11.0+cu113", index = "pytorch"}
+anytree = "*"
+graphviz = "*"
 
 [dev-packages]
 
